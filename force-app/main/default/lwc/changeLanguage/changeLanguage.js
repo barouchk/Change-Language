@@ -1,22 +1,29 @@
 import { LightningElement } from "lwc";
 import changeUserLang from "@salesforce/apex/GlobalChangeLanguage.changeUserLang";
 
-export default class ChangeLanguageComponent extends LightningElement {
+export default class ChangeLanguage extends LightningElement {
   message;
   lang;
   isSuccess;
   connectedCallback() {
     this.callApexMethod();
   }
-  
+
   callApexMethod() {
     changeUserLang()
       .then((result) => {
         this.isSuccess = result.isSuccess;
         this.message = result.message;
         this.lang = result.lang;
-        window.indexedDB.deleteDatabase("actions");
-        window.indexedDB.deleteDatabase("ldsObjectInfo");
+
+        window.indexedDB = window.indexedDB
+                     || window.webkitIndexedDB
+                     || window.mozIndexedDB;
+                     
+        if (window.indexedDB) {
+          window.indexedDB.deleteDatabase("actions");
+          window.indexedDB.deleteDatabase("ldsObjectInfo");
+        }
         window.location.reload();
         console.log("Apex method called successfully", result);
       })
@@ -26,5 +33,5 @@ export default class ChangeLanguageComponent extends LightningElement {
         console.error("Error calling Apex method", error);
       });
   }
-    
+
 }
